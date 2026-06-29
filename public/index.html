@@ -1,0 +1,2508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Opportunity Pulse — AI Student Discovery Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #13161e;
+    --card:     #1a1e2a;
+    --border:   #2a2f42;
+    --pill:     #232840;
+    --accent:   #6c63ff;
+    --accent2:  #00e5c0;
+    --amber:    #f5a623;
+    --coral:    #ff6b6b;
+    --green:    #4cde90;
+    --purple:   #d88cff;
+    --text:     #f0f2f8;
+    --muted:    #7a8199;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ══════════════════════════════
+     LOGIN PAGE
+  ══════════════════════════════ */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #login-screen.hidden { display: none; }
+
+  #login-screen::before, #login-screen::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+  #login-screen::before {
+    width: 600px; height: 600px;
+    background: var(--accent);
+    top: -150px; left: -150px;
+    animation: blobMove1 9s ease-in-out infinite alternate;
+  }
+  #login-screen::after {
+    width: 500px; height: 500px;
+    background: var(--accent2);
+    bottom: -100px; right: -100px;
+    animation: blobMove2 11s ease-in-out infinite alternate;
+  }
+  @keyframes blobMove1 { to { transform: translate(70px, 90px) scale(1.12); } }
+  @keyframes blobMove2 { to { transform: translate(-50px, -70px) scale(1.18); } }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 440px;
+    padding: 40px 36px 32px;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .login-logo {
+    display: flex; align-items: center; gap: 9px;
+    font-family: var(--font-head); font-size: 18px; font-weight: 700;
+    margin-bottom: 28px; color: var(--text);
+  }
+  .login-logo-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent2); position: relative;
+  }
+  .login-logo-dot::after {
+    content: ''; position: absolute; inset: -4px;
+    border-radius: 50%; border: 1.5px solid var(--accent2);
+    opacity: 0.45; animation: ring 1.8s ease-out infinite;
+  }
+  @keyframes ring {
+    0%   { transform: scale(0.6); opacity: 0.6; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+
+  .login-headline {
+    font-family: var(--font-head);
+    font-size: 24px; font-weight: 700; line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .login-sub span { color: var(--accent2); }
+
+  /* LinkedIn OAuth button */
+  .btn-linkedin {
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 13px 20px;
+    background: #0a66c2;
+    border: none; border-radius: var(--radius-sm);
+    color: #fff; font-family: var(--font-body);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-bottom: 14px;
+    text-decoration: none;
+  }
+  .btn-linkedin:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-linkedin svg { width: 18px; height: 18px; fill: #fff; flex-shrink: 0; }
+
+  .login-divider {
+    display: flex; align-items: center; gap: 10px;
+    margin: 18px 0; color: var(--muted); font-size: 12px;
+  }
+  .login-divider::before, .login-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .login-form-group { margin-bottom: 14px; }
+  .login-label {
+    display: block; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px;
+  }
+  .login-input {
+    width: 100%; background: var(--card);
+    border: 1px solid var(--border); color: var(--text);
+    border-radius: var(--radius-sm); padding: 11px 14px;
+    font-family: var(--font-body); font-size: 13px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-input.error { border-color: var(--coral); }
+  .login-error-msg { font-size: 11px; color: var(--coral); margin-top: 4px; display: none; }
+  .login-error-msg.show { display: block; }
+
+  .btn-login {
+    width: 100%; padding: 12px;
+    background: linear-gradient(90deg, var(--accent), #8b5cf6);
+    border: none; border-radius: var(--radius-sm);
+    color: #fff; font-family: var(--font-head);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 4px;
+  }
+  .btn-login:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .login-toggle {
+    text-align: center; margin-top: 16px;
+    font-size: 12px; color: var(--muted);
+  }
+  .login-toggle-btn {
+    color: var(--accent2); cursor: pointer;
+    background: none; border: none; font-size: 12px;
+    font-family: var(--font-body); text-decoration: underline;
+    padding: 0;
+  }
+  .login-toggle-btn:hover { opacity: 0.8; }
+
+  .login-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .login-api-error {
+    background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+    border-radius: var(--radius-sm); padding: 10px 12px;
+    font-size: 12px; color: var(--coral); margin-bottom: 14px; display: none;
+  }
+  .login-api-error.show { display: block; }
+
+  /* ══════════════════════════════
+     ONBOARDING SCREEN
+  ══════════════════════════════ */
+  .onboard-screen {
+    position: fixed; inset: 0;
+    background: var(--bg); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; overflow-y: auto;
+  }
+  .onboard-screen.hidden { display: none; }
+
+  .onboard-screen::before, .onboard-screen::after {
+    content: ''; position: fixed; border-radius: 50%;
+    filter: blur(80px); opacity: 0.12; pointer-events: none;
+  }
+  .onboard-screen::before {
+    width: 500px; height: 500px; background: var(--accent);
+    top: -100px; left: -100px;
+    animation: blobMove1 8s ease-in-out infinite alternate;
+  }
+  .onboard-screen::after {
+    width: 400px; height: 400px; background: var(--accent2);
+    bottom: -80px; right: -80px;
+    animation: blobMove2 10s ease-in-out infinite alternate;
+  }
+
+  .onboard-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; width: 100%; max-width: 520px;
+    position: relative; z-index: 1; overflow: hidden;
+  }
+
+  .ob-progress-track { height: 3px; background: var(--border); width: 100%; }
+  .ob-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease;
+  }
+  .ob-inner { padding: 36px 36px 28px; }
+
+  .ob-steps { display: flex; align-items: center; gap: 6px; margin-bottom: 28px; }
+  .ob-step-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--border); transition: background 0.3s, width 0.3s;
+  }
+  .ob-step-dot.active { background: var(--accent); width: 22px; border-radius: 4px; }
+  .ob-step-dot.done { background: var(--accent2); }
+  .ob-step-label { margin-left: auto; font-size: 11px; color: var(--muted); }
+
+  .ob-step { display: none; }
+  .ob-step.active { display: block; animation: stepIn 0.3s ease; }
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .ob-headline {
+    font-family: var(--font-head); font-size: 22px; font-weight: 700;
+    line-height: 1.25; margin-bottom: 6px;
+  }
+  .ob-subhead { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .ob-subhead span { color: var(--accent2); }
+
+  .ob-logo {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-head); font-size: 16px; font-weight: 700;
+    margin-bottom: 28px; color: var(--text);
+  }
+  .ob-logo-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent2); position: relative;
+  }
+  .ob-logo-dot::after {
+    content: ''; position: absolute; inset: -3px;
+    border-radius: 50%; border: 1.5px solid var(--accent2);
+    opacity: 0.4; animation: ring 1.8s ease-out infinite;
+  }
+
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px;
+  }
+  .form-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius-sm); padding: 9px 12px;
+    font-family: var(--font-body); font-size: 13px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .avatar-upload-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+  .avatar-ring {
+    width: 96px; height: 96px; border-radius: 50%;
+    border: 2px dashed var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; position: relative;
+    transition: border-color 0.2s; overflow: hidden;
+    margin-bottom: 10px; background: var(--card);
+  }
+  .avatar-ring:hover { border-color: var(--accent); }
+  .avatar-ring img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .avatar-placeholder {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; color: var(--muted); font-size: 11px; text-align: center; padding: 10px;
+  }
+  .avatar-placeholder-icon { font-size: 28px; }
+  .avatar-initials-preview {
+    display: none; width: 100%; height: 100%; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    align-items: center; justify-content: center;
+    font-weight: 700; font-size: 28px; color: #fff;
+  }
+  #avatar-file { display: none; }
+  .avatar-hint { font-size: 11px; color: var(--muted); }
+
+  .ob-suggest-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  #ob-suggest-skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .ptag-suggest {
+    background: var(--pill); color: var(--accent2); font-size: 11px;
+    padding: 4px 10px; border-radius: 20px; border: 1px solid #253450;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .ptag-suggest:hover { opacity: 0.7; }
+
+  .skills-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 10px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    cursor: text; transition: border-color 0.2s;
+  }
+  .skills-wrap:focus-within { border-color: var(--accent); }
+  .skill-pill {
+    background: var(--pill); color: var(--accent2); font-size: 11px;
+    padding: 4px 10px; border-radius: 20px; border: 1px solid #253450;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .skill-remove { cursor: pointer; color: var(--muted); font-size: 13px; line-height: 1; transition: color 0.15s; }
+  .skill-remove:hover { color: var(--coral); }
+  .skill-add-input {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-family: var(--font-body); font-size: 12px; min-width: 80px;
+  }
+  .skill-add-input::placeholder { color: var(--muted); }
+
+  .location-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .loc-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s; text-align: center; user-select: none;
+  }
+  .loc-card:hover { border-color: var(--accent); }
+  .loc-card.selected { border-color: var(--accent2); background: #0e2028; }
+  .loc-card-icon { font-size: 22px; margin-bottom: 6px; }
+  .loc-card-label { font-size: 12px; font-weight: 500; }
+  .loc-card-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .source-card {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: var(--radius-md); padding: 14px 16px; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: center; gap: 10px; user-select: none;
+  }
+  .source-card:hover { border-color: var(--accent); background: #1e2235; }
+  .source-card.selected { border-color: var(--accent2); background: #0e2028; }
+  .source-card.selected .source-check { opacity: 1; }
+  .source-dot-lg { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .source-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .source-desc { font-size: 10px; color: var(--muted); }
+  .source-check { font-size: 14px; color: var(--accent2); opacity: 0; transition: opacity 0.2s; }
+  .source-hint { font-size: 11px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+  .ob-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 28px; gap: 12px;
+  }
+  .ob-btn-back {
+    padding: 10px 22px; border-radius: var(--radius-sm);
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--font-body); font-size: 13px;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .ob-btn-back:hover { border-color: var(--text); color: var(--text); }
+  .ob-btn-next {
+    padding: 11px 28px; border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--accent), #8b5cf6);
+    border: none; color: #fff; font-family: var(--font-head);
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    flex: 1; max-width: 220px; margin-left: auto;
+  }
+  .ob-btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* ══════════════════════════════
+     LAYOUT SHELL
+  ══════════════════════════════ */
+  .shell {
+    display: none;
+    grid-template-columns: 230px 1fr;
+    grid-template-rows: 58px 1fr;
+    min-height: 100vh;
+  }
+  .shell.visible { display: grid; }
+
+  /* ══════════════════════════════
+     TOP BAR
+  ══════════════════════════════ */
+  .topbar {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 16px;
+    padding: 0 24px;
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100; height: 58px;
+  }
+  .logo {
+    font-family: var(--font-head); font-size: 18px; font-weight: 700;
+    display: flex; align-items: center; gap: 9px;
+    white-space: nowrap; letter-spacing: -0.3px;
+  }
+  .logo-pulse {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--accent2); position: relative;
+  }
+  .logo-pulse::after {
+    content: ''; position: absolute; inset: -4px;
+    border-radius: 50%; border: 1.5px solid var(--accent2);
+    opacity: 0.5; animation: ring 1.8s ease-out infinite;
+  }
+
+  .search-wrap { flex: 1; max-width: 500px; position: relative; }
+  .search-wrap input {
+    width: 100%; background: var(--card);
+    border: 1px solid var(--border); color: var(--text);
+    border-radius: 10px; padding: 8px 16px 8px 40px;
+    font-family: var(--font-body); font-size: 13px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute; left: 13px; top: 50%;
+    transform: translateY(-50%); color: var(--muted);
+    font-size: 16px; pointer-events: none;
+  }
+
+  .badge-live {
+    background: #1a2e1a; color: var(--green); font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 20px; border: 1px solid #2a4a2a;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green); animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  .topbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+
+  .profile-dropdown-wrap { position: relative; }
+  .profile-dropdown {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); min-width: 190px; z-index: 300;
+    overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    animation: modalIn 0.15s ease;
+  }
+  .profile-dropdown.open { display: block; }
+  .pd-header { padding: 12px 14px 10px; border-bottom: 1px solid var(--border); }
+  .pd-name { font-weight: 500; font-size: 13px; }
+  .pd-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .pd-item {
+    display: flex; align-items: center; gap: 9px;
+    padding: 10px 14px; font-size: 13px; color: var(--muted);
+    cursor: pointer; transition: background 0.15s, color 0.15s;
+  }
+  .pd-item:hover { background: var(--pill); color: var(--text); }
+  .pd-item.danger:hover { color: var(--coral); }
+  .pd-icon { font-size: 14px; width: 16px; text-align: center; }
+
+  .notif-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15px; position: relative;
+    transition: border-color 0.2s;
+  }
+  .notif-btn:hover { border-color: var(--accent); }
+  .notif-badge {
+    position: absolute; top: -2px; right: -2px;
+    width: 14px; height: 14px; background: var(--coral);
+    border-radius: 50%; font-size: 8px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; border: 2px solid var(--surface);
+  }
+  .profile-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    color: #fff; flex-shrink: 0;
+  }
+
+  /* ══════════════════════════════
+     SIDEBAR
+  ══════════════════════════════ */
+  .sidebar {
+    background: var(--surface); border-right: 1px solid var(--border);
+    padding: 20px 0 24px; position: sticky; top: 58px;
+    height: calc(100vh - 58px); overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .sidebar-section { padding: 0 14px 14px; }
+  .sidebar-label {
+    font-size: 10px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); padding: 0 8px 8px; display: block;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--muted); font-size: 13px;
+    transition: background 0.15s, color 0.15s; margin-bottom: 2px; user-select: none;
+  }
+  .nav-item:hover { background: var(--card); color: var(--text); }
+  .nav-item.active { background: var(--pill); color: var(--text); }
+  .nav-icon { width: 20px; font-size: 15px; flex-shrink: 0; text-align: center; }
+  .nav-count {
+    margin-left: auto; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 600; padding: 1px 7px;
+    border-radius: 20px; min-width: 22px; text-align: center;
+  }
+  .nav-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-left: 2px; }
+  .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 6px 14px 14px; }
+
+  .profile-card {
+    margin: 0 12px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px;
+  }
+  .profile-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; color: #fff; margin-bottom: 10px;
+  }
+  .profile-name { font-weight: 500; font-size: 13px; margin-bottom: 2px; }
+  .profile-sub { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .profile-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .ptag {
+    background: var(--pill); color: var(--accent2); font-size: 10px;
+    padding: 3px 9px; border-radius: 20px; border: 1px solid #253450;
+  }
+  .profile-match-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; font-size: 11px; color: var(--muted);
+  }
+  .profile-match-num { font-weight: 500; color: var(--accent2); font-size: 13px; }
+  .mini-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .mini-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+  /* ══════════════════════════════
+     MAIN CONTENT
+  ══════════════════════════════ */
+  .main { padding: 24px 28px; overflow-y: auto; min-height: calc(100vh - 58px); }
+
+  .alert-banner {
+    background: #170f2a; border: 1px solid #4a2d80;
+    border-radius: var(--radius-md); padding: 13px 18px;
+    display: flex; align-items: center; gap: 13px;
+    margin-bottom: 24px; font-size: 13px; animation: slideDown 0.4s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .alert-icon { font-size: 18px; flex-shrink: 0; }
+  .alert-text { color: var(--muted); }
+  .alert-text strong { color: var(--text); }
+  .alert-close {
+    margin-left: auto; background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px;
+    border-radius: 4px; transition: color 0.15s; flex-shrink: 0;
+  }
+  .alert-close:hover { color: var(--text); }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 18px 16px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .stat-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.s1::before { background: var(--accent); }
+  .stat-card.s2::before { background: var(--amber); }
+  .stat-card.s3::before { background: var(--accent2); }
+  .stat-card.s4::before { background: var(--coral); }
+  .stat-num { font-family: var(--font-head); font-size: 28px; font-weight: 700; line-height: 1.1; margin-bottom: 4px; }
+  .stat-label { font-size: 11px; color: var(--muted); }
+  .stat-delta { font-size: 11px; color: var(--green); margin-top: 8px; }
+  .stat-icon { position: absolute; right: 14px; top: 18px; font-size: 22px; opacity: 0.25; }
+
+  /* Calendar */
+  .cal-section { margin-bottom: 26px; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-title { font-family: var(--font-head); font-size: 14px; font-weight: 500; }
+  .cal-nav { display: flex; gap: 6px; }
+  .cal-nav-btn {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .cal-nav-btn:hover { border-color: var(--accent); color: var(--text); }
+  .calendar-strip {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding-bottom: 6px; scrollbar-width: none;
+  }
+  .calendar-strip::-webkit-scrollbar { display: none; }
+  .cal-day {
+    flex-shrink: 0; width: 54px; text-align: center;
+    padding: 10px 6px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--card);
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .cal-day:hover { border-color: var(--accent); }
+  .cal-day.today { background: var(--accent); border-color: var(--accent); }
+  .cal-day.has-event { border-color: #3d3580; }
+  .cal-day-name { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .cal-day.today .cal-day-name { color: rgba(255,255,255,0.65); }
+  .cal-day-num { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+  .cal-dots { display: flex; justify-content: center; gap: 3px; margin-top: 5px; min-height: 6px; }
+  .cal-dot { width: 5px; height: 5px; border-radius: 50%; }
+  .cal-dot.d-hack   { background: var(--accent); }
+  .cal-dot.d-intern { background: var(--accent2); }
+  .cal-dot.d-schol  { background: var(--amber); }
+
+  /* Filters */
+  .filters-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 6px 15px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 12px;
+    font-family: var(--font-body); cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-sep { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
+  .sort-select {
+    background: var(--card); border: 1px solid var(--border); color: var(--muted);
+    font-size: 12px; font-family: var(--font-body); padding: 6px 12px;
+    border-radius: var(--radius-sm); outline: none; cursor: pointer; margin-left: auto;
+    transition: border-color 0.15s;
+  }
+  .sort-select:hover { border-color: var(--accent); }
+
+  /* Feed section header */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .section-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+  .section-count { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  /* Feed / Cards */
+  .feed { display: flex; flex-direction: column; gap: 12px; }
+
+  .opp-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    display: grid; grid-template-columns: 52px 1fr auto;
+    gap: 16px; align-items: start; position: relative;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .opp-card:hover { border-color: #3d3a60; transform: translateY(-1px); }
+  .opp-card.urgent-card { border-color: rgba(255,107,107,0.3); }
+
+  .opp-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .opp-meta { min-width: 0; }
+  .opp-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+  .opp-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .opp-source { font-size: 11px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; }
+  .source-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
+  .opp-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .opp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .tag {
+    font-size: 10px; font-weight: 500; padding: 3px 9px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .tag-hack    { background: #1e1a40; color: var(--accent); border: 1px solid #3a3580; }
+  .tag-intern  { background: #0e2028; color: var(--accent2); border: 1px solid #1a3a48; }
+  .tag-scholar { background: #2f2a1a; color: var(--amber); border: 1px solid #4a3e1a; }
+  .tag-event   { background: #2a1e30; color: var(--purple); border: 1px solid #4a3060; }
+  .tag-prize   { background: #2f2a1a; color: var(--amber); border: 1px solid #4a3e1a; }
+  .tag-new     { background: #1a2e1a; color: var(--green); border: 1px solid #2a4a2a; }
+  .tag-remote  { background: var(--pill); color: var(--muted); border: 1px solid var(--border); }
+  .tag-stipend { background: #0e2028; color: var(--accent2); border: 1px solid #1a3a48; }
+  .tag-urgent  { background: rgba(255,107,107,0.1); color: var(--coral); border: 1px solid rgba(255,107,107,0.25); }
+
+  .match-row { display: flex; align-items: center; gap: 10px; }
+  .match-bar { flex: 1; max-width: 120px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .match-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .match-label { font-size: 10px; color: var(--muted); }
+
+  .opp-right { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; min-width: 90px; }
+  .deadline-badge { text-align: center; }
+  .days-num { font-family: var(--font-head); font-size: 28px; font-weight: 700; line-height: 1; }
+  .days-num.urgent { color: var(--coral); }
+  .days-num.soon   { color: var(--amber); }
+  .days-num.ok     { color: var(--text); }
+  .days-label { font-size: 10px; color: var(--muted); }
+  .deadline-date { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .apply-btn {
+    padding: 8px 16px; background: var(--accent); border: none;
+    border-radius: var(--radius-sm); color: #fff; font-family: var(--font-body);
+    font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .apply-btn:hover { opacity: 0.85; transform: scale(1.03); }
+  .apply-btn:active { transform: scale(0.97); }
+
+  .save-btn {
+    position: absolute; top: 14px; right: 14px;
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 4px 6px;
+    border-radius: 6px; transition: color 0.15s, background 0.15s; line-height: 1;
+  }
+  .save-btn:hover { color: var(--amber); background: rgba(245,166,35,0.1); }
+  .save-btn.saved { color: var(--amber); }
+
+  /* Loading skeleton */
+  .skeleton-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    display: grid; grid-template-columns: 52px 1fr; gap: 16px;
+  }
+  .skel {
+    background: linear-gradient(90deg, var(--border) 25%, #333852 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite; border-radius: 4px;
+  }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .skel-icon { width: 48px; height: 48px; border-radius: 12px; }
+  .skel-line { height: 12px; margin-bottom: 8px; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-title { font-family: var(--font-head); font-size: 16px; margin-bottom: 6px; color: var(--text); }
+  .empty-sub { font-size: 13px; }
+
+  /* Profile Edit Modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65); z-index: 500;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 28px; width: 420px;
+    max-width: 95vw; animation: modalIn 0.22s ease; position: relative;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.94) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-title { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .modal-close {
+    position: absolute; top: 16px; right: 18px;
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; cursor: pointer; line-height: 1;
+    padding: 2px 6px; border-radius: 4px; transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+  .modal-avatar {
+    width: 54px; height: 54px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 18px; color: #fff; flex-shrink: 0;
+  }
+  .modal-avatar-info { font-size: 12px; color: var(--muted); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .btn-cancel {
+    padding: 9px 20px; border-radius: var(--radius-sm);
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--font-body); font-size: 13px;
+    cursor: pointer; transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-save {
+    padding: 9px 22px; border-radius: var(--radius-sm);
+    background: var(--accent); border: none; color: #fff;
+    font-family: var(--font-body); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .btn-save:hover { opacity: 0.88; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 12px 18px; font-size: 13px;
+    display: flex; align-items: center; gap: 10px; z-index: 999;
+    transform: translateY(80px); opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none; max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Error banner */
+  .error-banner {
+    background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.25);
+    border-radius: var(--radius-md); padding: 12px 16px; font-size: 12px;
+    color: var(--coral); margin-bottom: 16px; display: none;
+    align-items: center; gap: 8px;
+  }
+  .error-banner.show { display: flex; }
+
+  /* Data attribution notice */
+  .data-notice {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 10px 14px;
+    font-size: 11px; color: var(--muted); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; grid-template-rows: 58px auto 1fr; }
+    .sidebar { position: relative; top: 0; height: auto; display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .opp-card { grid-template-columns: 44px 1fr; }
+    .opp-right { display: none; }
+  }
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .main { padding: 16px; }
+    .login-box { padding: 28px 20px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-dot"></div>
+      Opportunity Pulse
+    </div>
+
+    <div class="login-headline" id="login-headline">Welcome back</div>
+    <div class="login-sub">Sign in to discover <span>perfectly matched</span> opportunities for you.</div>
+
+    <!-- API error -->
+    <div class="login-api-error" id="login-api-error"></div>
+
+    <!-- LinkedIn OAuth -->
+    <button class="btn-linkedin" onclick="loginWithLinkedIn()">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
+      Continue with LinkedIn
+    </button>
+
+    <div class="login-divider">or continue with email</div>
+
+    <!-- Register name fields (shown only in signup mode) -->
+    <div id="name-fields" style="display:none">
+      <div class="form-row" style="margin-bottom:14px">
+        <div>
+          <label class="login-label">First Name</label>
+          <input class="login-input" id="reg-first" type="text" placeholder="Arjun" autocomplete="given-name">
+          <div class="login-error-msg" id="err-reg-first">Enter your first name</div>
+        </div>
+        <div>
+          <label class="login-label">Last Name</label>
+          <input class="login-input" id="reg-last" type="text" placeholder="Ravi" autocomplete="family-name">
+        </div>
+      </div>
+    </div>
+
+    <div class="login-form-group">
+      <label class="login-label">Email Address</label>
+      <input class="login-input" id="login-email" type="email" placeholder="you@college.edu" autocomplete="email">
+      <div class="login-error-msg" id="err-email">Enter a valid email address</div>
+    </div>
+
+    <div class="login-form-group">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password">
+      <div class="login-error-msg" id="err-password">Password must be at least 6 characters</div>
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="handleEmailAuth()">
+      Sign In
+    </button>
+
+    <div class="login-toggle">
+      <span id="login-toggle-text">Don't have an account?</span>
+      <button class="login-toggle-btn" onclick="toggleAuthMode()">
+        <span id="login-toggle-label">Create account</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ONBOARDING SCREEN
+═══════════════════════════════════ -->
+<div class="onboard-screen" id="onboard-screen" style="display:none">
+  <div class="onboard-box">
+    <div class="ob-progress-track">
+      <div class="ob-progress-fill" id="ob-progress" style="width:25%"></div>
+    </div>
+    <div class="ob-inner">
+      <div class="ob-logo"><div class="ob-logo-dot"></div>Opportunity Pulse</div>
+
+      <div class="ob-steps">
+        <div class="ob-step-dot active" id="dot-0"></div>
+        <div class="ob-step-dot" id="dot-1"></div>
+        <div class="ob-step-dot" id="dot-2"></div>
+        <div class="ob-step-dot" id="dot-3"></div>
+        <span class="ob-step-label" id="ob-step-label">Step 1 of 4</span>
+      </div>
+
+      <!-- Step 1: Identity -->
+      <div class="ob-step active" id="step-0">
+        <div class="ob-headline">Set up your<br>student profile ✦</div>
+        <div class="ob-subhead">Tell us about yourself so we can find <span>perfectly matched</span> opportunities.</div>
+
+        <div class="avatar-upload-area">
+          <div class="avatar-ring" onclick="document.getElementById('avatar-file').click()">
+            <div class="avatar-placeholder" id="avatar-placeholder">
+              <span class="avatar-placeholder-icon">📷</span>
+              <span>Add photo</span>
+            </div>
+            <div class="avatar-initials-preview" id="avatar-initials"></div>
+            <img id="avatar-img-preview" style="display:none" alt="avatar">
+          </div>
+          <div class="avatar-hint">Optional — click to upload</div>
+          <input type="file" id="avatar-file" accept="image/*" onchange="handleAvatarUpload(event)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="ob-first" type="text" placeholder="e.g. Arjun" oninput="updateAvatarPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" id="ob-last" type="text" placeholder="e.g. Ravi" oninput="updateAvatarPreview()">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Academic Year</label>
+            <select class="form-input" id="ob-year">
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year" selected>3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="PG 1st Year">PG 1st Year</option>
+              <option value="PG 2nd Year">PG 2nd Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Degree / Branch</label>
+            <input class="form-input" id="ob-degree" type="text" placeholder="e.g. B.Tech CSE">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">College / University</label>
+            <input class="form-input" id="ob-college" type="text" placeholder="e.g. BITS Pilani">
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" id="ob-city" type="text" placeholder="e.g. Pilani">
+          </div>
+        </div>
+
+        <div class="ob-nav">
+          <button class="ob-btn-next" onclick="obNext()">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Skills -->
+      <div class="ob-step" id="step-1">
+        <div class="ob-headline">What are your<br>key skills? 🧠</div>
+        <div class="ob-subhead">We use this to calculate your <span>profile match</span> score.</div>
+
+        <div class="ob-suggest-label">Quick add (tap to select)</div>
+        <div id="ob-suggest-skills">
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Python</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Java</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">JavaScript</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">React</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Node.js</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">ML / AI</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Data Science</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">DSA</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Flutter</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">UI/UX</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Cloud</span>
+          <span class="ptag-suggest" onclick="obQuickSkill(this)">Blockchain</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your skills (Enter or comma to add)</label>
+          <div class="skills-wrap" id="ob-skills-wrap" onclick="document.getElementById('ob-skill-input').focus()">
+            <input class="skill-add-input" id="ob-skill-input" placeholder="Type skill…"
+              onkeydown="handleObSkillKey(event)" oninput="handleObSkillInput(event)">
+          </div>
+        </div>
+
+        <div class="ob-nav">
+          <button class="ob-btn-back" onclick="obBack()">← Back</button>
+          <button class="ob-btn-next" onclick="obNext()">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Location -->
+      <div class="ob-step" id="step-2">
+        <div class="ob-headline">Where are you<br>looking? 🌏</div>
+        <div class="ob-subhead">This helps filter <span>location-relevant</span> opportunities.</div>
+
+        <div class="location-options">
+          <div class="loc-card selected" id="loc-remote" onclick="selectLocation('remote')">
+            <div class="loc-card-icon">🏠</div>
+            <div class="loc-card-label">Remote / WFH</div>
+            <div class="loc-card-sub">Work from anywhere</div>
+          </div>
+          <div class="loc-card" id="loc-india" onclick="selectLocation('india')">
+            <div class="loc-card-icon">🇮🇳</div>
+            <div class="loc-card-label">India (On-site)</div>
+            <div class="loc-card-sub">Metro & Tier-2 cities</div>
+          </div>
+          <div class="loc-card" id="loc-us" onclick="selectLocation('us')">
+            <div class="loc-card-icon">🇺🇸</div>
+            <div class="loc-card-label">USA / Global</div>
+            <div class="loc-card-sub">International opportunities</div>
+          </div>
+          <div class="loc-card" id="loc-other" onclick="selectLocation('other')">
+            <div class="loc-card-icon">🌍</div>
+            <div class="loc-card-label">All Locations</div>
+            <div class="loc-card-sub">No preference</div>
+          </div>
+        </div>
+
+        <div class="ob-nav">
+          <button class="ob-btn-back" onclick="obBack()">← Back</button>
+          <button class="ob-btn-next" onclick="obNext()">Next →</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Sources -->
+      <div class="ob-step" id="step-3">
+        <div class="ob-headline">Pick your<br>sources 📡</div>
+        <div class="ob-subhead">We'll fetch <span>live data</span> from these platforms.</div>
+
+        <div class="source-grid">
+          <div class="source-card selected" id="src-Unstop" onclick="toggleSource(this,'Unstop')">
+            <div class="source-dot-lg" style="background:#6c63ff"></div>
+            <div><div class="source-name">Unstop</div><div class="source-desc">Hackathons & contests</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card selected" id="src-Internshala" onclick="toggleSource(this,'Internshala')">
+            <div class="source-dot-lg" style="background:#00e5c0"></div>
+            <div><div class="source-name">Internshala</div><div class="source-desc">Internships & training</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card selected" id="src-LinkedIn" onclick="toggleSource(this,'LinkedIn')">
+            <div class="source-dot-lg" style="background:#0a66c2"></div>
+            <div><div class="source-name">LinkedIn</div><div class="source-desc">Jobs & workshops</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card selected" id="src-AICTE Portal" onclick="toggleSource(this,'AICTE Portal')">
+            <div class="source-dot-lg" style="background:#f5a623"></div>
+            <div><div class="source-name">AICTE Portal</div><div class="source-desc">Govt scholarships</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card selected" id="src-Devfolio" onclick="toggleSource(this,'Devfolio')">
+            <div class="source-dot-lg" style="background:#d88cff"></div>
+            <div><div class="source-name">Devfolio</div><div class="source-desc">Dev hackathons</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card" id="src-HackerEarth" onclick="toggleSource(this,'HackerEarth')">
+            <div class="source-dot-lg" style="background:#ff6b6b"></div>
+            <div><div class="source-name">HackerEarth</div><div class="source-desc">Coding challenges</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card" id="src-AngelList" onclick="toggleSource(this,'AngelList')">
+            <div class="source-dot-lg" style="background:#4cde90"></div>
+            <div><div class="source-name">AngelList</div><div class="source-desc">Startup internships</div></div>
+            <div class="source-check">✓</div>
+          </div>
+          <div class="source-card" id="src-NSP" onclick="toggleSource(this,'NSP')">
+            <div class="source-dot-lg" style="background:#f5a623"></div>
+            <div><div class="source-name">NSP India</div><div class="source-desc">National scholarships</div></div>
+            <div class="source-check">✓</div>
+          </div>
+        </div>
+        <div class="source-hint" id="source-count-hint">5 sources selected</div>
+
+        <div class="ob-nav">
+          <button class="ob-btn-back" onclick="obBack()">← Back</button>
+          <button class="ob-btn-next" onclick="obFinish()" style="background:linear-gradient(90deg,#00e5c0,#6c63ff)">
+            🚀 Launch Dashboard
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     MAIN DASHBOARD
+═══════════════════════════════════ -->
+<div class="shell" id="main-shell">
+
+  <header class="topbar">
+    <div class="logo">
+      <div class="logo-pulse"></div>
+      Opportunity Pulse
+    </div>
+
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search-input" placeholder="Search opportunities, skills, prizes…" oninput="renderFeed()">
+    </div>
+
+    <div class="badge-live" id="badge-live">
+      <span class="live-dot"></span>
+      <span id="live-label">Live · Fetching…</span>
+    </div>
+
+    <div class="topbar-right">
+      <div class="notif-btn" title="Notifications" onclick="showToast('🔔','No new notifications')">
+        🔔
+        <div class="notif-badge" id="notif-badge">0</div>
+      </div>
+      <div class="profile-dropdown-wrap">
+        <div class="profile-btn" id="topbar-profile-btn" title="Account" onclick="toggleProfileDropdown()">?</div>
+        <div class="profile-dropdown" id="profile-dropdown">
+          <div class="pd-header">
+            <div class="pd-name" id="pd-name">Student</div>
+            <div class="pd-email" id="pd-email">opportunity-pulse account</div>
+          </div>
+          <div class="pd-item" onclick="closeProfileDropdown(); openProfileModal()">
+            <span class="pd-icon">✏️</span> Edit Profile
+          </div>
+          <div class="pd-item danger" onclick="closeProfileDropdown(); logOut()">
+            <span class="pd-icon">↩</span> Sign Out
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Discover</span>
+      <div class="nav-item active" onclick="setCategory('all', this)">
+        <span class="nav-icon">◈</span> All Opportunities
+        <span class="nav-count" id="count-all">0</span>
+      </div>
+      <div class="nav-item" onclick="setCategory('hackathon', this)">
+        <span class="nav-icon">⚡</span> Hackathons
+        <span class="nav-count" id="count-hackathon">0</span>
+      </div>
+      <div class="nav-item" onclick="setCategory('internship', this)">
+        <span class="nav-icon">💼</span> Internships
+        <span class="nav-count" id="count-internship">0</span>
+      </div>
+      <div class="nav-item" onclick="setCategory('scholarship', this)">
+        <span class="nav-icon">🎓</span> Scholarships
+        <span class="nav-count" id="count-scholarship">0</span>
+      </div>
+      <div class="nav-item" onclick="setCategory('event', this)">
+        <span class="nav-icon">📡</span> Events & Workshops
+        <span class="nav-count" id="count-event">0</span>
+      </div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section" id="sources-sidebar-section">
+      <span class="sidebar-label">Sources</span>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section" style="padding-bottom:8px">
+      <span class="sidebar-label">My Profile</span>
+    </div>
+    <div class="profile-card" onclick="openProfileModal()" style="cursor:pointer" title="Click to edit profile">
+      <div class="profile-avatar" id="sidebar-avatar">?</div>
+      <div class="profile-name" id="sidebar-name">Loading…</div>
+      <div class="profile-sub" id="sidebar-sub"></div>
+      <div class="profile-tags" id="sidebar-tags"></div>
+      <div class="profile-match-row">
+        <span>Profile completeness</span>
+        <span class="profile-match-num" id="sidebar-completeness">0%</span>
+      </div>
+      <div class="mini-bar"><div class="mini-fill" id="sidebar-mini-fill" style="width:0%"></div></div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- Error banner -->
+    <div class="error-banner" id="main-error-banner">
+      <span>⚠️</span>
+      <span id="main-error-text">Could not fetch live data. Showing cached results.</span>
+      <button style="margin-left:auto;background:none;border:none;color:var(--coral);cursor:pointer;font-size:16px" onclick="this.parentElement.classList.remove('show')">✕</button>
+    </div>
+
+    <!-- Alert Banner -->
+    <div class="alert-banner" id="alert-banner" style="display:none">
+      <span class="alert-icon">⚠️</span>
+      <span class="alert-text" id="alert-text"><strong></strong></span>
+      <button class="alert-close" onclick="document.getElementById('alert-banner').style.display='none'">✕</button>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card s1">
+        <span class="stat-icon">◈</span>
+        <div class="stat-num" style="color:var(--accent)" id="stat-total">—</div>
+        <div class="stat-label">Total opportunities</div>
+        <div class="stat-delta" id="stat-new-delta">Fetching live data…</div>
+      </div>
+      <div class="stat-card s2">
+        <span class="stat-icon">🏆</span>
+        <div class="stat-num" style="color:var(--amber)" id="stat-prize">—</div>
+        <div class="stat-label">Total prize pool</div>
+        <div class="stat-delta" id="stat-prize-delta">Across hackathons</div>
+      </div>
+      <div class="stat-card s3">
+        <span class="stat-icon">✦</span>
+        <div class="stat-num" style="color:var(--accent2)" id="stat-match">—</div>
+        <div class="stat-label">Avg profile match</div>
+        <div class="stat-delta">Based on your skills</div>
+      </div>
+      <div class="stat-card s4">
+        <span class="stat-icon">⏱</span>
+        <div class="stat-num" style="color:var(--coral)" id="stat-urgent">—</div>
+        <div class="stat-label">Expiring within 48h</div>
+        <div class="stat-delta" id="stat-urgent-delta">⚠ Act now</div>
+      </div>
+    </div>
+
+    <!-- Calendar Strip -->
+    <div class="cal-section">
+      <div class="cal-header">
+        <div class="cal-title" id="cal-title">Deadline Calendar</div>
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+          <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+        </div>
+      </div>
+      <div class="calendar-strip" id="calendar-strip"></div>
+    </div>
+
+    <!-- Data notice -->
+    <div class="data-notice" id="data-notice" style="display:none">
+      <span>ℹ️</span>
+      <span id="data-notice-text">Data fetched from server. LinkedIn data synced via OAuth.</span>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+      <button class="filter-btn" onclick="setFilter('new', this)">New today</button>
+      <button class="filter-btn" onclick="setFilter('prize', this)">₹1000+ prize</button>
+      <button class="filter-btn" onclick="setFilter('remote', this)">Remote only</button>
+      <button class="filter-btn" onclick="setFilter('urgent', this)">Closing soon</button>
+      <button class="filter-btn" onclick="setFilter('saved', this)">Saved</button>
+      <span class="filter-sep"></span>
+      <select class="sort-select" id="sort-select" onchange="renderFeed()">
+        <option value="match">Sort: Best match</option>
+        <option value="deadline">Sort: Deadline</option>
+        <option value="prize">Sort: Prize</option>
+        <option value="newest">Sort: Newest</option>
+      </select>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Your Feed</div>
+      <div class="section-count" id="feed-count">Loading…</div>
+    </div>
+
+    <div class="feed" id="feed">
+      <!-- Skeleton loading -->
+      <div class="skeleton-card" id="skel-1">
+        <div class="skel skel-icon"></div>
+        <div>
+          <div class="skel skel-line" style="width:60%"></div>
+          <div class="skel skel-line" style="width:40%"></div>
+          <div class="skel skel-line" style="width:90%"></div>
+        </div>
+      </div>
+      <div class="skeleton-card" id="skel-2">
+        <div class="skel skel-icon"></div>
+        <div>
+          <div class="skel skel-line" style="width:70%"></div>
+          <div class="skel skel-line" style="width:35%"></div>
+          <div class="skel skel-line" style="width:85%"></div>
+        </div>
+      </div>
+      <div class="skeleton-card" id="skel-3">
+        <div class="skel skel-icon"></div>
+        <div>
+          <div class="skel skel-line" style="width:55%"></div>
+          <div class="skel skel-line" style="width:45%"></div>
+          <div class="skel skel-line" style="width:80%"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Profile Edit Modal -->
+<div class="modal-overlay" id="profile-modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Edit Profile</div>
+    <button class="modal-close" onclick="closeProfileModal()">✕</button>
+
+    <div class="modal-avatar-row">
+      <div class="modal-avatar" id="modal-avatar-preview">?</div>
+      <div class="modal-avatar-info">Initials update automatically from your name</div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" id="field-first" type="text" placeholder="e.g. Arjun">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" id="field-last" type="text" placeholder="e.g. Ravi">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Year</label>
+        <input class="form-input" id="field-year" type="text" placeholder="e.g. 3rd Year">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Degree</label>
+        <input class="form-input" id="field-degree" type="text" placeholder="e.g. B.Tech CSE">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">College / University</label>
+      <input class="form-input" id="field-college" type="text" placeholder="e.g. BITS Pilani">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Profile Completeness (%)</label>
+      <input class="form-input" id="field-completeness" type="number" min="0" max="100" placeholder="e.g. 82">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Skills (Enter or comma to add)</label>
+      <div class="skills-wrap" id="skills-wrap" onclick="document.getElementById('skill-input').focus()">
+        <input class="skill-add-input" id="skill-input" placeholder="Add skill…"
+          onkeydown="handleSkillKey(event)" oninput="handleSkillInput(event)">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeProfileModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProfile()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span id="toast-icon">✓</span>
+  <span id="toast-msg">Saved!</span>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG — Update API_BASE to your server URL
+═══════════════════════════════════════════════════════ */
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api'
+  : '/api'; // Same-origin in production
+
+/* ═══════════════════════════════════════════════════════
+   AUTH STATE
+═══════════════════════════════════════════════════════ */
+let authToken    = null;
+let currentUser  = null;
+let isSignupMode = false;
+
+function getStoredAuth() {
+  try {
+    const t = localStorage.getItem('op_token');
+    const u = localStorage.getItem('op_user');
+    if (t && u) return { token: t, user: JSON.parse(u) };
+  } catch(e) {}
+  return null;
+}
+
+function storeAuth(token, user) {
+  localStorage.setItem('op_token', token);
+  localStorage.setItem('op_user', JSON.stringify(user));
+}
+
+function clearAuth() {
+  localStorage.removeItem('op_token');
+  localStorage.removeItem('op_user');
+  localStorage.removeItem('op_profile');
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOGIN PAGE LOGIC
+═══════════════════════════════════════════════════════ */
+function toggleAuthMode() {
+  isSignupMode = !isSignupMode;
+  document.getElementById('login-headline').textContent = isSignupMode ? 'Create account' : 'Welcome back';
+  document.getElementById('login-toggle-text').textContent = isSignupMode ? 'Already have an account?' : "Don't have an account?";
+  document.getElementById('login-toggle-label').textContent = isSignupMode ? 'Sign in' : 'Create account';
+  document.getElementById('login-btn').textContent = isSignupMode ? 'Create Account' : 'Sign In';
+  document.getElementById('name-fields').style.display = isSignupMode ? 'block' : 'none';
+  document.getElementById('login-password').autocomplete = isSignupMode ? 'new-password' : 'current-password';
+  clearLoginErrors();
+}
+
+function clearLoginErrors() {
+  document.querySelectorAll('.login-error-msg').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.login-input').forEach(el => el.classList.remove('error'));
+  document.getElementById('login-api-error').classList.remove('show');
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-api-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function setLoginLoading(loading) {
+  const btn = document.getElementById('login-btn');
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="login-spinner"></span>Please wait…'
+    : (isSignupMode ? 'Create Account' : 'Sign In');
+}
+
+async function handleEmailAuth() {
+  clearLoginErrors();
+  let valid = true;
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('login-email').classList.add('error');
+    document.getElementById('err-email').classList.add('show');
+    valid = false;
+  }
+  if (!password || password.length < 6) {
+    document.getElementById('login-password').classList.add('error');
+    document.getElementById('err-password').classList.add('show');
+    valid = false;
+  }
+  if (isSignupMode) {
+    const first = document.getElementById('reg-first').value.trim();
+    if (!first) {
+      document.getElementById('reg-first').classList.add('error');
+      document.getElementById('err-reg-first').classList.add('show');
+      valid = false;
+    }
+  }
+  if (!valid) return;
+
+  setLoginLoading(true);
+
+  try {
+    const endpoint = isSignupMode ? `${API_BASE}/auth/register` : `${API_BASE}/auth/login`;
+    const body = isSignupMode
+      ? { email, password, firstName: document.getElementById('reg-first').value.trim(), lastName: document.getElementById('reg-last').value.trim() }
+      : { email, password };
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || 'Authentication failed');
+
+    authToken   = data.token;
+    currentUser = data.user;
+    storeAuth(authToken, currentUser);
+
+    if (isSignupMode || !currentUser.profileComplete) {
+      // New user — go to onboarding
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('onboard-screen').style.display = 'flex';
+      if (isSignupMode && currentUser.firstName) {
+        document.getElementById('ob-first').value = currentUser.firstName;
+        document.getElementById('ob-last').value  = currentUser.lastName || '';
+        updateAvatarPreview();
+      }
+    } else {
+      // Returning user — skip to dashboard
+      loadProfileAndLaunch(currentUser.profile);
+    }
+  } catch(err) {
+    showLoginError(err.message || 'Network error. Is the server running?');
+  } finally {
+    setLoginLoading(false);
+  }
+}
+
+function loginWithLinkedIn() {
+  // Opens LinkedIn OAuth popup — server handles callback
+  window.location.href = `${API_BASE}/auth/linkedin`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTO-LOGIN CHECK
+═══════════════════════════════════════════════════════ */
+(function init() {
+  const stored = getStoredAuth();
+  if (!stored) return; // Show login page
+
+  authToken   = stored.token;
+  currentUser = stored.user;
+
+  // Verify token silently
+  fetch(`${API_BASE}/auth/verify`, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  }).then(r => {
+    if (!r.ok) throw new Error('Token expired');
+    return r.json();
+  }).then(data => {
+    currentUser = data.user;
+    storeAuth(authToken, currentUser);
+    if (currentUser.profile) {
+      loadProfileAndLaunch(currentUser.profile);
+    } else {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('onboard-screen').style.display = 'flex';
+    }
+  }).catch(() => {
+    clearAuth();
+    // Stay on login page
+  });
+})();
+
+function loadProfileAndLaunch(profile) {
+  profileData = Object.assign(profileData, profile || {});
+  document.getElementById('login-screen').classList.add('hidden');
+  const shell = document.getElementById('main-shell');
+  shell.classList.add('visible');
+  renderSidebar();
+  renderCalendar();
+  fetchOpportunities();
+  updateSourceSidebar();
+  if (currentUser) {
+    document.getElementById('pd-email').textContent = currentUser.email || '';
+  }
+}
+
+function logOut() {
+  clearAuth();
+  authToken = null;
+  currentUser = null;
+  OPPORTUNITIES = [];
+  document.getElementById('main-shell').classList.remove('visible');
+  document.getElementById('login-screen').classList.remove('hidden');
+  showLoginError('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ONBOARDING STATE & LOGIC
+═══════════════════════════════════════════════════════ */
+let obCurrentStep = 0;
+const OB_TOTAL = 4;
+let obSkillSet = new Set();
+let obSelectedLocation = 'remote';
+let obSelectedSources = new Set(['Unstop','Internshala','LinkedIn','AICTE Portal','Devfolio']);
+let obAvatarDataUrl = null;
+
+const STEP_LABELS    = ['Step 1 of 4','Step 2 of 4','Step 3 of 4','Step 4 of 4'];
+const STEP_PROGRESS  = ['25%','50%','75%','100%'];
+
+function obGoTo(step) {
+  document.getElementById(`step-${obCurrentStep}`).classList.remove('active');
+  document.getElementById(`dot-${obCurrentStep}`).classList.remove('active');
+  document.getElementById(`dot-${obCurrentStep}`).classList.add('done');
+  obCurrentStep = step;
+  document.getElementById(`step-${obCurrentStep}`).classList.add('active');
+  document.getElementById(`dot-${obCurrentStep}`).classList.remove('done');
+  document.getElementById(`dot-${obCurrentStep}`).classList.add('active');
+  document.getElementById('ob-step-label').textContent = STEP_LABELS[obCurrentStep];
+  document.getElementById('ob-progress').style.width   = STEP_PROGRESS[obCurrentStep];
+}
+
+function obNext() {
+  if (obCurrentStep === 0) {
+    const first = document.getElementById('ob-first').value.trim();
+    if (!first) { shakeEl('ob-first'); return; }
+  }
+  if (obCurrentStep < OB_TOTAL - 1) obGoTo(obCurrentStep + 1);
+}
+
+function obBack() {
+  if (obCurrentStep > 0) {
+    document.getElementById(`step-${obCurrentStep}`).classList.remove('active');
+    document.getElementById(`dot-${obCurrentStep}`).classList.remove('active','done');
+    obCurrentStep--;
+    document.getElementById(`step-${obCurrentStep}`).classList.add('active');
+    document.getElementById(`dot-${obCurrentStep}`).classList.remove('done');
+    document.getElementById(`dot-${obCurrentStep}`).classList.add('active');
+    document.getElementById('ob-step-label').textContent = STEP_LABELS[obCurrentStep];
+    document.getElementById('ob-progress').style.width   = STEP_PROGRESS[obCurrentStep];
+  }
+}
+
+function shakeEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.borderColor = 'var(--coral)';
+  el.style.animation   = 'shake 0.3s ease';
+  setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
+}
+
+// Avatar upload
+function handleAvatarUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('⚠️','Image too large (max 2MB)'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    obAvatarDataUrl = ev.target.result;
+    document.getElementById('avatar-placeholder').style.display = 'none';
+    document.getElementById('avatar-initials').style.display    = 'none';
+    const img = document.getElementById('avatar-img-preview');
+    img.src = obAvatarDataUrl;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateAvatarPreview() {
+  if (obAvatarDataUrl) return;
+  const first  = (document.getElementById('ob-first') || {}).value || '';
+  const last   = (document.getElementById('ob-last')  || {}).value || '';
+  const initEl = document.getElementById('avatar-initials');
+  if (!initEl) return;
+  if (first.trim() || last.trim()) {
+    initEl.textContent = ((first.trim()[0]||'')+(last.trim()[0]||'')).toUpperCase();
+    initEl.style.display = 'flex';
+    document.getElementById('avatar-placeholder').style.display = 'none';
+  } else {
+    initEl.style.display = 'none';
+    document.getElementById('avatar-placeholder').style.display = 'flex';
+  }
+}
+
+// Skills
+function renderObSkills() {
+  const wrap  = document.getElementById('ob-skills-wrap');
+  const input = document.getElementById('ob-skill-input');
+  wrap.innerHTML = '';
+  obSkillSet.forEach(s => {
+    const pill = document.createElement('span');
+    pill.className = 'skill-pill';
+    pill.innerHTML = `${s}<span class="skill-remove" onclick="obRemoveSkill('${s.replace(/'/g,"\\'")}')">✕</span>`;
+    wrap.appendChild(pill);
+  });
+  wrap.appendChild(input);
+  input.value = '';
+}
+
+function obRemoveSkill(s) {
+  obSkillSet.delete(s);
+  renderObSkills();
+  document.querySelectorAll('#ob-suggest-skills .ptag-suggest').forEach(el => {
+    if (el.textContent === s) { el.style.opacity = '1'; el.style.pointerEvents = ''; }
+  });
+}
+
+function obAddSkill(s) {
+  s = s.trim();
+  if (s && !obSkillSet.has(s)) { obSkillSet.add(s); renderObSkills(); }
+}
+
+function handleObSkillKey(e) {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); obAddSkill(e.target.value.replace(/,/g,'')); }
+  else if (e.key === 'Backspace' && e.target.value === '' && obSkillSet.size) {
+    const last = [...obSkillSet].pop(); obSkillSet.delete(last); renderObSkills();
+  }
+}
+
+function handleObSkillInput(e) {
+  if (e.target.value.endsWith(',')) obAddSkill(e.target.value.replace(/,/g,''));
+}
+
+function obQuickSkill(el) {
+  const s = el.textContent;
+  if (!obSkillSet.has(s)) {
+    obSkillSet.add(s);
+    el.style.opacity = '0.4'; el.style.pointerEvents = 'none';
+    renderObSkills();
+  }
+}
+
+// Location
+function selectLocation(key) {
+  obSelectedLocation = key;
+  ['remote','india','us','other'].forEach(k => {
+    document.getElementById(`loc-${k}`).classList.toggle('selected', k === key);
+  });
+}
+
+// Sources
+function toggleSource(card, name) {
+  if (obSelectedSources.has(name)) { obSelectedSources.delete(name); card.classList.remove('selected'); }
+  else { obSelectedSources.add(name); card.classList.add('selected'); }
+  document.getElementById('source-count-hint').textContent =
+    `${obSelectedSources.size} source${obSelectedSources.size !== 1 ? 's' : ''} selected`;
+}
+
+function calcCompleteness() {
+  let score = 30;
+  if ((document.getElementById('ob-first')||{value:''}).value.trim()) score += 15;
+  if ((document.getElementById('ob-college')||{value:''}).value.trim()) score += 10;
+  if (obAvatarDataUrl) score += 10;
+  if (obSkillSet.size >= 3) score += 20;
+  else if (obSkillSet.size > 0) score += 10;
+  if ((document.getElementById('ob-city')||{value:''}).value.trim()) score += 5;
+  if (obSelectedSources.size >= 3) score += 10;
+  return Math.min(score, 100);
+}
+
+async function obFinish() {
+  const first  = document.getElementById('ob-first').value.trim() || 'Student';
+  const last   = document.getElementById('ob-last').value.trim()  || '';
+  const year   = document.getElementById('ob-year').value         || '3rd Year';
+  const degree = document.getElementById('ob-degree').value.trim()|| 'B.Tech CSE';
+  const college= document.getElementById('ob-college').value.trim()|| '';
+  const city   = document.getElementById('ob-city').value.trim();
+
+  const inp = document.getElementById('ob-skill-input');
+  if (inp && inp.value.trim()) obSkillSet.add(inp.value.trim());
+
+  profileData = {
+    first, last, year, degree, college, city,
+    completeness: calcCompleteness(),
+    skills: obSkillSet.size ? [...obSkillSet] : ['Python','React'],
+    avatar: obAvatarDataUrl,
+    location: obSelectedLocation,
+    sources: [...obSelectedSources]
+  };
+
+  // Save profile to server
+  if (authToken) {
+    try {
+      await fetch(`${API_BASE}/user/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ profile: profileData })
+      });
+    } catch(e) {
+      // Profile save failed silently — will retry on next login
+    }
+  }
+
+  localStorage.setItem('op_profile', JSON.stringify(profileData));
+
+  const ob = document.getElementById('onboard-screen');
+  ob.style.transition = 'opacity 0.5s ease';
+  ob.style.opacity = '0';
+  setTimeout(() => {
+    ob.style.display = 'none';
+    const shell = document.getElementById('main-shell');
+    shell.classList.add('visible');
+    renderSidebar();
+    renderCalendar();
+    fetchOpportunities();
+    updateSourceSidebar();
+    setTimeout(() => showToast('🚀', `Welcome, ${profileData.first}!`), 400);
+  }, 500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROFILE STATE
+═══════════════════════════════════════════════════════ */
+let profileData = {
+  first: 'Student', last: '', year: '3rd Year', degree: 'B.Tech CSE',
+  college: '', completeness: 30, skills: [], avatar: null,
+  location: 'remote', sources: ['Unstop','Internshala','LinkedIn','AICTE Portal','Devfolio']
+};
+
+// Restore profile from localStorage if available
+(function restoreProfile() {
+  try {
+    const saved = localStorage.getItem('op_profile');
+    if (saved) Object.assign(profileData, JSON.parse(saved));
+  } catch(e) {}
+})();
+
+function getInitials(first, last) {
+  return ((first[0]||'')+(last[0]||'')).toUpperCase() || '?';
+}
+
+function toggleProfileDropdown() {
+  document.getElementById('profile-dropdown').classList.toggle('open');
+}
+function closeProfileDropdown() {
+  document.getElementById('profile-dropdown').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.querySelector('.profile-dropdown-wrap');
+  if (wrap && !wrap.contains(e.target)) closeProfileDropdown();
+});
+
+function renderSidebar() {
+  const p = profileData;
+  const initials = getInitials(p.first || 'S', p.last || '');
+
+  const topBtn = document.getElementById('topbar-profile-btn');
+  if (p.avatar) {
+    topBtn.innerHTML = `<img src="${p.avatar}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;" alt="avatar">`;
+  } else {
+    topBtn.textContent = initials;
+  }
+
+  const sideAvatar = document.getElementById('sidebar-avatar');
+  if (p.avatar) {
+    sideAvatar.innerHTML = `<img src="${p.avatar}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;" alt="avatar">`;
+    sideAvatar.style.background = 'none'; sideAvatar.style.padding = '0';
+  } else {
+    sideAvatar.textContent = initials;
+    sideAvatar.style.background = ''; sideAvatar.style.padding = '';
+  }
+
+  document.getElementById('sidebar-name').textContent = `${p.first} ${p.last}`.trim();
+  const subParts = [p.year, p.degree, p.college].filter(Boolean);
+  document.getElementById('sidebar-sub').textContent = subParts.join(' · ');
+  document.getElementById('sidebar-completeness').textContent = `${p.completeness}%`;
+  document.getElementById('sidebar-mini-fill').style.width = `${p.completeness}%`;
+  const tagsEl = document.getElementById('sidebar-tags');
+  tagsEl.innerHTML = (p.skills||[]).map(s => `<span class="ptag">${s}</span>`).join('');
+  const pdName = document.getElementById('pd-name');
+  if (pdName) pdName.textContent = `${p.first} ${p.last}`.trim();
+}
+
+function openProfileModal() {
+  const p = profileData;
+  document.getElementById('field-first').value        = p.first  || '';
+  document.getElementById('field-last').value         = p.last   || '';
+  document.getElementById('field-year').value         = p.year   || '';
+  document.getElementById('field-degree').value       = p.degree || '';
+  document.getElementById('field-college').value      = p.college|| '';
+  document.getElementById('field-completeness').value = p.completeness || 30;
+  modalSkills = [...(p.skills||[])];
+  renderModalSkills();
+  updateModalAvatar();
+  document.getElementById('profile-modal').classList.add('open');
+  setTimeout(() => document.getElementById('field-first').focus(), 100);
+}
+
+function closeProfileModal() {
+  document.getElementById('profile-modal').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('profile-modal')) closeProfileModal();
+}
+
+function updateModalAvatar() {
+  const first = (document.getElementById('field-first')||{value:''}).value.trim();
+  const last  = (document.getElementById('field-last') ||{value:''}).value.trim();
+  const el = document.getElementById('modal-avatar-preview');
+  if (el) el.textContent = getInitials(first||'A', last||'R');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['field-first','field-last'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateModalAvatar);
+  });
+});
+
+let modalSkills = [];
+
+function renderModalSkills() {
+  const wrap  = document.getElementById('skills-wrap');
+  const input = document.getElementById('skill-input');
+  wrap.innerHTML = '';
+  modalSkills.forEach((s, i) => {
+    const pill = document.createElement('span');
+    pill.className = 'skill-pill';
+    pill.innerHTML = `${s}<span class="skill-remove" onclick="removeSkill(${i})">✕</span>`;
+    wrap.appendChild(pill);
+  });
+  wrap.appendChild(input);
+  input.value = '';
+}
+
+function removeSkill(i) { modalSkills.splice(i,1); renderModalSkills(); }
+
+function handleSkillKey(e) {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addSkillFromInput(); }
+  else if (e.key === 'Backspace' && e.target.value === '' && modalSkills.length) {
+    modalSkills.pop(); renderModalSkills();
+  }
+}
+
+function handleSkillInput(e) { if (e.target.value.endsWith(',')) addSkillFromInput(); }
+
+function addSkillFromInput() {
+  const input = document.getElementById('skill-input');
+  const val = input.value.replace(/,/g,'').trim();
+  if (val && !modalSkills.includes(val)) { modalSkills.push(val); renderModalSkills(); }
+  else { input.value = ''; }
+}
+
+async function saveProfile() {
+  const input = document.getElementById('skill-input');
+  const pending = input.value.replace(/,/g,'').trim();
+  if (pending && !modalSkills.includes(pending)) modalSkills.push(pending);
+
+  profileData = {
+    ...profileData,
+    first:        document.getElementById('field-first').value.trim()  || profileData.first,
+    last:         document.getElementById('field-last').value.trim()   || profileData.last,
+    year:         document.getElementById('field-year').value.trim()   || profileData.year,
+    degree:       document.getElementById('field-degree').value.trim() || profileData.degree,
+    college:      document.getElementById('field-college').value.trim()|| profileData.college,
+    completeness: Math.min(100, Math.max(0, parseInt(document.getElementById('field-completeness').value)||profileData.completeness)),
+    skills:       modalSkills.length ? [...modalSkills] : profileData.skills
+  };
+
+  renderSidebar();
+  closeProfileModal();
+  localStorage.setItem('op_profile', JSON.stringify(profileData));
+  showToast('✓', 'Profile updated!');
+  renderFeed(); // Recalculate match scores
+
+  // Sync to server
+  if (authToken) {
+    try {
+      await fetch(`${API_BASE}/user/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ profile: profileData })
+      });
+    } catch(e) {}
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   OPPORTUNITIES — fetched from server
+═══════════════════════════════════════════════════════ */
+let OPPORTUNITIES = [];
+let lastFetchTime = null;
+let fetchInProgress = false;
+
+async function fetchOpportunities() {
+  if (fetchInProgress) return;
+  fetchInProgress = true;
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+    const res = await fetch(`${API_BASE}/opportunities`, { headers });
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+
+    OPPORTUNITIES = data.opportunities || [];
+    lastFetchTime = new Date();
+
+    document.getElementById('live-label').textContent = 'Live · Just updated';
+    document.getElementById('main-error-banner').classList.remove('show');
+
+    const notice = document.getElementById('data-notice');
+    notice.style.display = 'flex';
+    document.getElementById('data-notice-text').textContent =
+      `${OPPORTUNITIES.length} opportunities fetched · LinkedIn synced via OAuth · Last updated ${lastFetchTime.toLocaleTimeString()}`;
+
+    updateStats();
+    renderCalendar();
+    renderFeed();
+
+  } catch(err) {
+    console.error('Fetch error:', err);
+    // Show error + use cached data if any
+    const errBanner = document.getElementById('main-error-banner');
+    document.getElementById('main-error-text').textContent =
+      `Could not reach server: ${err.message}. ${OPPORTUNITIES.length ? 'Showing cached data.' : 'No cached data available.'}`;
+    errBanner.classList.add('show');
+    document.getElementById('live-label').textContent = 'Offline · Cached data';
+
+    // Load seed data as fallback
+    if (OPPORTUNITIES.length === 0) loadSeedData();
+    else { updateStats(); renderCalendar(); renderFeed(); }
+  } finally {
+    fetchInProgress = false;
+    // Auto-refresh every 5 minutes
+    setTimeout(fetchOpportunities, 5 * 60 * 1000);
+  }
+}
+
+// Fallback seed data (used only when server is unreachable)
+function loadSeedData() {
+  const today = new Date();
+  const addDays = (d) => { const x = new Date(today); x.setDate(x.getDate()+d); return x; };
+  const fmt = (d) => d.toLocaleDateString('en-IN', {month:'short', day:'numeric', year:'numeric'});
+
+  OPPORTUNITIES = [
+    {
+      id: 'seed-1', event_name: 'Smart India Hackathon 2025', source: 'Unstop',
+      source_color: '#6c63ff', category: 'hackathon', icon: '⚡', icon_bg: '#1e1e3f',
+      deadline: fmt(addDays(2)), days: 2, reward: '₹1,00,000', reward_raw: 100000,
+      stipend: null, remote: true, new_today: false, match: 97,
+      eligibility: '2nd–4th Year, all branches',
+      apply_link: 'https://unstop.com/hackathons/smart-india-hackathon-2025-government-of-india-1177433',
+      description: '48-hour national hackathon with govt. problem statements across 8 domains.',
+      tags: ['hackathon','prize'], is_seed: true
+    },
+    {
+      id: 'seed-2', event_name: 'Google STEP Internship (SWE)', source: 'LinkedIn',
+      source_color: '#0a66c2', category: 'internship', icon: '💼', icon_bg: '#1a2f38',
+      deadline: fmt(addDays(1)), days: 1, reward: null, reward_raw: 0,
+      stipend: '₹1.2L/month', remote: true, new_today: false, match: 95,
+      eligibility: 'Pre-final year, CSE/ECE',
+      apply_link: 'https://careers.google.com/programs/step/',
+      description: "Google's flagship summer internship for 2nd-year CS students.",
+      tags: ['internship','remote','stipend'], is_seed: true
+    },
+    {
+      id: 'seed-3', event_name: 'Microsoft Imagine Cup 2025', source: 'Devfolio',
+      source_color: '#d88cff', category: 'hackathon', icon: '⚡', icon_bg: '#1e1e3f',
+      deadline: fmt(addDays(14)), days: 14, reward: '₹2,00,000', reward_raw: 200000,
+      stipend: null, remote: true, new_today: true, match: 92,
+      eligibility: 'All years, global students',
+      apply_link: 'https://imaginecup.microsoft.com',
+      description: 'Global student innovation competition — AI/ML and cloud solutions preferred.',
+      tags: ['hackathon','prize','new'], is_seed: true
+    },
+    {
+      id: 'seed-4', event_name: 'AICTE PG Scholarship for SC/ST', source: 'AICTE Portal',
+      source_color: '#f5a623', category: 'scholarship', icon: '🎓', icon_bg: '#2f2a1a',
+      deadline: fmt(addDays(21)), days: 21, reward: '₹30,000/yr', reward_raw: 30000,
+      stipend: null, remote: false, new_today: false, match: 78,
+      eligibility: 'SC/ST students, PG programs, govt. colleges',
+      apply_link: 'https://www.aicte-india.org/bureaus/fdc/schemes/pg-scholarship-scheme-sc-st-students',
+      description: 'Central government scholarship for meritorious SC/ST postgraduate students.',
+      tags: ['scholarship'], is_seed: true
+    },
+    {
+      id: 'seed-5', event_name: 'Internshala Data Science Intern', source: 'Internshala',
+      source_color: '#00e5c0', category: 'internship', icon: '💼', icon_bg: '#1a2f38',
+      deadline: fmt(addDays(9)), days: 9, reward: null, reward_raw: 0,
+      stipend: '₹8,000/month', remote: true, new_today: true, match: 96,
+      eligibility: '2nd–4th Year, CSE/Statistics',
+      apply_link: 'https://internshala.com/internship/data-science-work-from-home-jobs',
+      description: '6-month WFH internship at a Series-B startup. Python, Pandas, ML required.',
+      tags: ['internship','remote','new','stipend'], is_seed: true
+    },
+    {
+      id: 'seed-6', event_name: 'MLH Local Hack Day', source: 'Devfolio',
+      source_color: '#d88cff', category: 'hackathon', icon: '⚡', icon_bg: '#1e1e3f',
+      deadline: fmt(addDays(5)), days: 5, reward: '₹15,000', reward_raw: 15000,
+      stipend: null, remote: true, new_today: true, match: 90,
+      eligibility: 'Open to all students worldwide',
+      apply_link: 'https://mlh.io/',
+      description: '12-hour online hackathon. Open theme. Beginner friendly.',
+      tags: ['hackathon','prize','new'], is_seed: true
+    },
+    {
+      id: 'seed-7', event_name: 'AWS Machine Learning Workshop', source: 'LinkedIn',
+      source_color: '#0a66c2', category: 'event', icon: '📡', icon_bg: '#2a1e30',
+      deadline: fmt(addDays(7)), days: 7, reward: null, reward_raw: 0,
+      stipend: null, remote: true, new_today: false, match: 85,
+      eligibility: 'All years, basic Python knowledge',
+      apply_link: 'https://aws.amazon.com/training/events/',
+      description: 'Free 3-day intensive workshop with AWS voucher and certification prep.',
+      tags: ['event','remote'], is_seed: true
+    },
+    {
+      id: 'seed-8', event_name: 'Flipkart GRiD 6.0 — E-Commerce', source: 'Unstop',
+      source_color: '#6c63ff', category: 'hackathon', icon: '⚡', icon_bg: '#1e1e3f',
+      deadline: fmt(addDays(18)), days: 18, reward: '₹75,000', reward_raw: 75000,
+      stipend: null, remote: false, new_today: false, match: 89,
+      eligibility: 'UG/PG, CSE/IT/ECE',
+      apply_link: 'https://unstop.com/',
+      description: "Flipkart's annual engineering challenge. On-campus finals at Flipkart HQ.",
+      tags: ['hackathon','prize'], is_seed: true
+    },
+    {
+      id: 'seed-9', event_name: 'Tata Scholarship for Women in STEM', source: 'AICTE Portal',
+      source_color: '#f5a623', category: 'scholarship', icon: '🎓', icon_bg: '#2f2a1a',
+      deadline: fmt(addDays(15)), days: 15, reward: '₹50,000/yr', reward_raw: 50000,
+      stipend: null, remote: false, new_today: true, match: 82,
+      eligibility: 'Women, 1st–3rd Year, STEM branches',
+      apply_link: 'https://www.aicte-india.org/',
+      description: 'Annual merit-based scholarship for women pursuing STEM degrees in India.',
+      tags: ['scholarship','new'], is_seed: true
+    }
+  ];
+
+  updateStats();
+  renderCalendar();
+  renderFeed();
+  showToast('⚠️','Using offline data — server not connected');
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATS
+═══════════════════════════════════════════════════════ */
+function updateStats() {
+  const total   = OPPORTUNITIES.length;
+  const newToday = OPPORTUNITIES.filter(o => o.new_today).length;
+  const urgent  = OPPORTUNITIES.filter(o => o.days <= 2).length;
+  const avgMatch = total ? Math.round(OPPORTUNITIES.reduce((s,o)=>s+o.match,0)/total) : 0;
+  const totalPrize = OPPORTUNITIES.reduce((s,o)=>s+(o.reward_raw||0),0);
+
+  document.getElementById('stat-total').textContent   = total;
+  document.getElementById('stat-new-delta').textContent = `↑ ${newToday} added today`;
+  document.getElementById('stat-urgent').textContent  = urgent;
+  document.getElementById('stat-urgent-delta').textContent = urgent > 0 ? '⚠ Act immediately' : '✓ All clear';
+  document.getElementById('stat-match').textContent   = `${avgMatch}%`;
+
+  // Format prize
+  const prizeStr = totalPrize >= 100000
+    ? `₹${(totalPrize/100000).toFixed(1)}L+`
+    : totalPrize >= 1000
+    ? `₹${(totalPrize/1000).toFixed(0)}K+`
+    : `₹${totalPrize}`;
+  document.getElementById('stat-prize').textContent = prizeStr;
+  document.getElementById('stat-prize-delta').textContent = `Across ${OPPORTUNITIES.filter(o=>o.reward_raw>0).length} hackathons`;
+
+  // Update sidebar counts
+  const counts = { all: total, hackathon: 0, internship: 0, scholarship: 0, event: 0 };
+  OPPORTUNITIES.forEach(o => { if (counts[o.category] !== undefined) counts[o.category]++; });
+  Object.entries(counts).forEach(([k,v]) => {
+    const el = document.getElementById(`count-${k}`);
+    if (el) el.textContent = v;
+  });
+
+  // Alert banner for urgent items
+  const urgentItems = OPPORTUNITIES.filter(o => o.days <= 2);
+  const banner = document.getElementById('alert-banner');
+  if (urgentItems.length > 0) {
+    banner.style.display = 'flex';
+    document.getElementById('alert-text').innerHTML =
+      `<strong>${urgentItems.length} deadline${urgentItems.length>1?'s':''} in the next 48 hours</strong> — ${urgentItems.map(o=>o.event_name).join(' & ')}`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Notification badge
+  const notifEl = document.getElementById('notif-badge');
+  if (notifEl) notifEl.textContent = urgentItems.length;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CALENDAR — dynamic, real dates
+═══════════════════════════════════════════════════════ */
+let calOffset = 0; // weeks offset
+
+function renderCalendar() {
+  const today  = new Date();
+  const strip  = document.getElementById('calendar-strip');
+  const title  = document.getElementById('cal-title');
+
+  // Build deadline lookup by date string
+  const deadlineDates = {};
+  OPPORTUNITIES.forEach(o => {
+    const d = new Date(o.deadline);
+    if (!isNaN(d)) {
+      const key = d.toDateString();
+      if (!deadlineDates[key]) deadlineDates[key] = [];
+      deadlineDates[key].push(o.category);
+    }
+  });
+
+  const startDate = new Date(today);
+  startDate.setDate(today.getDate() + calOffset * 14);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 13);
+
+  title.textContent = `Deadline Calendar · ${startDate.toLocaleDateString('en-IN',{month:'long',year:'numeric'})}`;
+
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = '';
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const isToday = d.toDateString() === today.toDateString();
+    const cats    = deadlineDates[d.toDateString()] || [];
+    const hasEvent = cats.length > 0;
+
+    const dotMap = { hackathon: 'd-hack', internship: 'd-intern', scholarship: 'd-schol', event: 'd-hack' };
+    const dotsHTML = cats.slice(0,3).map(c => `<div class="cal-dot ${dotMap[c]||'d-hack'}"></div>`).join('');
+
+    html += `<div class="cal-day${isToday?' today':''}${hasEvent?' has-event':''}">
+      <div class="cal-day-name">${dayNames[d.getDay()]}</div>
+      <div class="cal-day-num">${d.getDate()}</div>
+      <div class="cal-dots">${dotsHTML}</div>
+    </div>`;
+  }
+  strip.innerHTML = html;
+}
+
+function calNav(dir) {
+  calOffset += dir;
+  renderCalendar();
+}
+
+/* ═══════════════════════════════════════════════════════
+   FILTER / SORT / RENDER FEED
+═══════════════════════════════════════════════════════ */
+let activeCategory = 'all';
+let activeFilter   = 'all';
+const savedSet     = new Set();
+
+function setCategory(cat, el) {
+  activeCategory = cat;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  renderFeed();
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderFeed();
+}
+
+function toggleSave(id, btn) {
+  if (savedSet.has(id)) {
+    savedSet.delete(id); btn.textContent = '☆'; btn.classList.remove('saved');
+    showToast('⭐','Removed from saved');
+  } else {
+    savedSet.add(id); btn.textContent = '★'; btn.classList.add('saved');
+    showToast('★','Saved to your list!');
+  }
+}
+
+function getFiltered() {
+  const q    = (document.getElementById('search-input')||{value:''}).value.toLowerCase().trim();
+  const sort = (document.getElementById('sort-select')||{value:'match'}).value;
+
+  // Dynamic match calculation based on user skills
+  const userSkills = (profileData.skills || []).map(s => s.toLowerCase());
+
+  let data = OPPORTUNITIES.map(o => {
+    // Recalculate match if we have user skills
+    if (userSkills.length > 0) {
+      const desc = [o.event_name, o.description, o.eligibility, ...(o.tags||[])].join(' ').toLowerCase();
+      const matched = userSkills.filter(s => desc.includes(s)).length;
+      o.match = Math.min(100, Math.round(60 + (matched / userSkills.length) * 40));
+    }
+    return o;
+  }).filter(o => {
+    if (activeCategory !== 'all' && o.category !== activeCategory) return false;
+    if (activeFilter === 'new'    && !o.new_today)            return false;
+    if (activeFilter === 'prize'  && !o.reward_raw)           return false;
+    if (activeFilter === 'remote' && !o.remote)               return false;
+    if (activeFilter === 'urgent' && o.days > 5)              return false;
+    if (activeFilter === 'saved'  && !savedSet.has(o.id))     return false;
+    if (q) {
+      const hay = [o.event_name,o.source,o.description,o.eligibility,...(o.tags||[])].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (sort === 'deadline') data.sort((a,b) => a.days - b.days);
+  else if (sort === 'match')  data.sort((a,b) => b.match - a.match);
+  else if (sort === 'prize')  data.sort((a,b) => b.reward_raw - a.reward_raw);
+  else if (sort === 'newest') data.sort((a,b) => (b.new_today?1:0) - (a.new_today?1:0));
+
+  return data;
+}
+
+const TAG_META = {
+  hackathon:  { cls: 'tag-hack',    label: 'Hackathon'   },
+  internship: { cls: 'tag-intern',  label: 'Internship'  },
+  scholarship:{ cls: 'tag-scholar', label: 'Scholarship' },
+  event:      { cls: 'tag-event',   label: 'Workshop'    },
+  prize:      { cls: 'tag-prize',   label: 'Cash Prize'  },
+  new:        { cls: 'tag-new',     label: 'New Today'   },
+  remote:     { cls: 'tag-remote',  label: 'Remote'      },
+  stipend:    { cls: 'tag-stipend', label: 'Paid'        },
+};
+
+function buildTags(tags) {
+  if (!Array.isArray(tags)) return '';
+  return tags.map(t => {
+    const m = TAG_META[t] || { cls: 'tag-remote', label: t };
+    return `<span class="tag ${m.cls}">${m.label}</span>`;
+  }).join('');
+}
+
+function renderFeed() {
+  // Remove skeleton loaders
+  ['skel-1','skel-2','skel-3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+
+  const data = getFiltered();
+  const feed = document.getElementById('feed');
+
+  document.getElementById('feed-count').textContent =
+    `Showing ${data.length} result${data.length !== 1 ? 's' : ''}`;
+  document.getElementById('stat-total').textContent = OPPORTUNITIES.length;
+
+  if (!data.length) {
+    feed.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No opportunities found</div>
+        <div class="empty-sub">Try adjusting your filters or search term</div>
+      </div>`;
+    return;
+  }
+
+  feed.innerHTML = data.map(o => {
+    const urgency = o.days <= 2 ? 'urgent' : o.days <= 7 ? 'soon' : 'ok';
+    const cardCls = o.days <= 2 ? 'urgent-card' : '';
+    const isSaved = savedSet.has(o.id);
+    const tagHTML = buildTags(o.tags);
+    const rewardBadge = o.reward
+      ? `<span class="tag tag-prize" style="margin-left:2px">${o.reward}</span>`
+      : (o.stipend ? `<span class="tag tag-stipend">${o.stipend}</span>` : '');
+    const seedBadge = o.is_seed
+      ? `<span class="tag tag-remote" style="font-size:9px;opacity:0.6">Seed data</span>`
+      : '';
+
+    // Sanitize apply_link
+    let safeLink = '#';
+    try {
+      const url = new URL(o.apply_link || '');
+      if (['http:','https:'].includes(url.protocol)) safeLink = url.href;
+    } catch(e) {}
+
+    return `
+    <div class="opp-card ${cardCls}" title="${(o.event_name||'').replace(/"/g,'&quot;')}">
+      <div class="opp-icon" style="background:${o.icon_bg||'#1a1e2a'}">${o.icon||'📋'}</div>
+
+      <div class="opp-meta">
+        <div class="opp-header">
+          <div class="opp-title">${o.event_name||'Untitled'}</div>
+        </div>
+        <div class="opp-source">
+          <span class="source-dot" style="background:${o.source_color||'#7a8199'}"></span>
+          ${o.source||'Unknown'} · ${o.eligibility||'Open to all'}
+        </div>
+        <div class="opp-desc">${o.description||''}</div>
+        <div class="opp-tags">${tagHTML}${rewardBadge}${seedBadge}</div>
+        <div class="match-row">
+          <div class="match-bar"><div class="match-fill" style="width:${o.match||50}%"></div></div>
+          <div class="match-label">${o.match||50}% profile match</div>
+        </div>
+      </div>
+
+      <div class="opp-right">
+        <div class="deadline-badge">
+          <div class="days-num ${urgency}">${o.days}</div>
+          <div class="days-label">days left</div>
+          <div class="deadline-date">${o.deadline||''}</div>
+        </div>
+        <button class="apply-btn" onclick="event.stopPropagation(); ${safeLink !== '#' ? `window.open('${safeLink}','_blank','noopener,noreferrer')` : "showToast('⚠️','No link available')"}">
+          Apply →
+        </button>
+      </div>
+
+      <button
+        class="save-btn ${isSaved ? 'saved' : ''}"
+        onclick="event.stopPropagation(); toggleSave('${o.id}', this)"
+        title="${isSaved ? 'Unsave' : 'Save opportunity'}"
+      >${isSaved ? '★' : '☆'}</button>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   SOURCE SIDEBAR
+═══════════════════════════════════════════════════════ */
+const SOURCE_META = {
+  'Unstop':       { color: '#6c63ff' },
+  'Internshala':  { color: '#00e5c0' },
+  'LinkedIn':     { color: '#0a66c2' },
+  'AICTE Portal': { color: '#f5a623' },
+  'Devfolio':     { color: '#d88cff' },
+  'HackerEarth':  { color: '#ff6b6b' },
+  'AngelList':    { color: '#4cde90' },
+  'NSP':          { color: '#f5a623' },
+};
+
+function updateSourceSidebar() {
+  const section = document.getElementById('sources-sidebar-section');
+  if (!section) return;
+  let html = '<span class="sidebar-label">Sources</span>';
+  (profileData.sources || []).forEach(name => {
+    const meta = SOURCE_META[name] || { color: '#7a8199' };
+    html += `<div class="nav-item">
+      <span class="nav-dot" style="background:${meta.color}"></span> ${name}
+    </div>`;
+  });
+  section.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(icon, msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LINKEDIN OAUTH CALLBACK HANDLER
+═══════════════════════════════════════════════════════ */
+(function checkOAuthCallback() {
+  const params = new URLSearchParams(window.location.search);
+  const token  = params.get('token');
+  const error  = params.get('error');
+
+  if (error) {
+    showLoginError(`LinkedIn login failed: ${error}`);
+    window.history.replaceState({}, '', '/');
+    return;
+  }
+
+  if (token) {
+    // Verify and load user
+    fetch(`${API_BASE}/auth/verify`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(r => r.json()).then(data => {
+      authToken   = token;
+      currentUser = data.user;
+      storeAuth(token, data.user);
+      window.history.replaceState({}, '', '/');
+
+      if (!currentUser.profileComplete) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('onboard-screen').style.display = 'flex';
+        if (currentUser.firstName) {
+          document.getElementById('ob-first').value = currentUser.firstName;
+          updateAvatarPreview();
+        }
+      } else {
+        loadProfileAndLaunch(currentUser.profile);
+      }
+    }).catch(err => {
+      showLoginError('OAuth verification failed. Please try again.');
+      window.history.replaceState({}, '', '/');
+    });
+  }
+})();
+</script>
+</body>
+</html>
